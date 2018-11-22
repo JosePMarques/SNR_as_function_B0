@@ -12,7 +12,9 @@ The assumed Power Law of the NMR SNR is 3/2. This assumes the detectable signal 
 The sequence acquisition that is assumed in this simulations assumes
 
 |<----    dead time, dt    ---->|<----    acquisition time,  1/BW    ---->|
+
 |<----    repetition time, TR, divided by number of slices           ---->|
+
 |<----  dt/2 ---->|<----    echo time , TE      -->|<----   1/BW/2   ---->|
 
 "dead time" is used here in the loose sense, means simply that the that acquisition is not taking place (crusher gradients, slice selective gradient, phase encoding, readout preaphaser gradients arebeing  aplpied in this time). The centre of the excitation pulse happens in the middle of this "dead time".  
