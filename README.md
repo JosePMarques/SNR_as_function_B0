@@ -9,7 +9,7 @@ Currently the SNR and CNR dependence as a function of field strength are estimat
 The assumed Power Law of the NMR SNR is 3/2. This assumes the detectable signal increases with the square power of the static magnetic field and noise is in a regime in between system and physiological dominated ones.
 
 
-The sequence acquisition that is assumed in this simulations assumes
+The sequence acquisition that is used in this simulations is a spoiled gradient echo that can be stripped down to the following relavant parameters:
 
 |<----    dead time, dt    ---->|<----    acquisition time,  1/BW    ---->|
 
