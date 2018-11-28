@@ -17,4 +17,4 @@ The sequence acquisition that is used in this simulations is a spoiled gradient 
 
 |<----  dt/2 ---->|<----    echo time , TE      -->|<----   1/BW/2   ---->|
 
-"dead time" is used here in the loose sense, means simply that the that acquisition is not taking place (crusher gradients, slice selective gradient, phase encoding, readout preaphaser gradients arebeing  aplpied in this time). The centre of the excitation pulse happens in the middle of this "dead time".  
+"dead time" is used here in the loose sense, means simply that the that acquisition is not taking place (crusher gradients, slice selective gradient, phase encoding, readout preaphaser gradients are being  applied during this time). The centre of the excitation pulse happens in the middle of this "dead time".  
