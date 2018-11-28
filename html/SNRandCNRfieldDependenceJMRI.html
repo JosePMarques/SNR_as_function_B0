@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Read Me</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-21"><meta name="DC.source" content="SNRandCNRfieldDependenceJMRI.m"><style type="text/css">
+      --><title>Read Me</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-28"><meta name="DC.source" content="SNRandCNRfieldDependenceJMRI.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -23,7 +23,7 @@ a:visited { color:#004aa0; text-decoration:none; }
 
 p { padding:0px; margin:0px 0px 20px; }
 img { padding:0px; margin:0px 0px 20px; border:none; }
-p img, pre img, tt img, li img { margin-bottom:0px; } 
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
 
 ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
 ul li { padding:0px; margin:0px 0px 7px 0px; }
@@ -38,11 +38,12 @@ ol li ul li { list-style:square; }
 
 .content { font-size:1.2em; line-height:140%; padding: 20px; }
 
-pre, tt, code { font-size:12px; }
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
 pre { margin:0px 0px 20px; }
-pre.error { color:red; }
 pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
 pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
 
 @media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
 
@@ -65,40 +66,37 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Read Me</h1><!--introduction--><p>cd to the directory where the function SNRandCNRfieldDependenceJMRI.m is located you can either run the whole code or simply use the html file to navigate through the results</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">initializing path and variables</a></li><li><a href="#2">initializing relaxation times field dependence</a></li><li><a href="#3">relaxation parameters - plotting relaxation parameters as a function of field</a></li><li><a href="#4">Functions</a></li><li><a href="#5">T1-w imaging</a></li><li><a href="#6">PD-w imaging</a></li><li><a href="#7">T2*-w imaging contrast</a></li><li><a href="#9">2D GRE signal considering various numbers of interleaved slices</a></li><li><a href="#10">End of simulations</a></li></ul></div><h2>initializing path and variables<a name="1"></a></h2><pre class="codeinput">close <span class="string">all</span>
+  </style></head><body><div class="content"><h1>Read Me</h1><!--introduction--><p>cd to the directory where the function SNRandCNRfieldDependenceJMRI.m is located you can either run the whole code or simply use the html file to navigate through the results</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">initializing path and variables</a></li><li><a href="#2">initializing relaxation times field dependence</a></li><li><a href="#3">relaxation parameters - plotting relaxation parameters as a function of field</a></li><li><a href="#4">Functions</a></li><li><a href="#5">T1-w imaging</a></li><li><a href="#6">PD-w imaging</a></li><li><a href="#7">T2*-w imaging contrast</a></li><li><a href="#9">2D GRE signal considering the number of interleaved slices per TR</a></li><li><a href="#10">End of simulations</a></li></ul></div><h2>initializing path and variables<a name="1"></a></h2><pre class="codeinput">close <span class="string">all</span>
 clear <span class="string">all</span>
 
 CurrDirectory = pwd ;
 addpath(genpath(CurrDirectory)) ;
 
+gamma = 42.577e6 ;          <span class="comment">% gyromagnetic constant in Hz</span>
+SNR_PowerLaw = 1.5 ;        <span class="comment">% at High Fields this has been measured at 1.68, at lower fields it is expected to tend towards 1 because noise in the sample</span>
+B0 = [0.1:0.1:7] ;          <span class="comment">% range of fields of simulations</span>
 
-gamma = 42.577e6 ; <span class="comment">% gyromagnetic constant in Hz</span>
-SNR_PowerLaw = 1.5 ; <span class="comment">% at high fields this has been measured at 1.68, at lower fields it is expected to tend towards 1 because noise in the sample</span>
-<span class="comment">% range of fields of simulations</span>
-B0 = [0.1:0.1:7] ;
-
-<span class="comment">% assumption of dead time within a GRE</span>
-<span class="comment">%(time needed to crush magentization apply slice selective )</span>
-DeadTime = 3e-3 ;
+<span class="comment">%(time needed to crush magnetization, apply slice selective and phase encoding gradients)</span>
+DeadTime = 3e-3 ;           <span class="comment">% assumption of dead time within a GRE</span>
 
 PDT1approach = <span class="string">'ShortEnoughTE'</span> ; <span class="comment">% options are 'ShortEnoughTE' or 'minTR'</span>
-minTR = 7e-3 ; <span class="comment">% minimum repetition time achievable (used in PD and T1w in case of minTR)</span>
-TEfractionOfT2 = 1 / 8 ; <span class="comment">% fraction of shorter T2 at which we assume that no T2* contrast exists (used for PD and T1w)</span>
+minTR = 7e-3 ;              <span class="comment">% minimum repetition time achievable (used in PD and T1w in case of minTR)</span>
+TEfractionOfT2 = 1 / 8 ;    <span class="comment">% fraction of shorter T2 at which we assume that no T2* contrast exists (used for PD and T1w)</span>
 
-PDflip_Ernstfract = 0.25 ; <span class="comment">% Fraction of the Ernst flip angle used for PD</span>
+PDflip_Ernstfract = 0.25 ;  <span class="comment">% fraction of the Ernst flip angle used for PD</span>
 
-TE_SpinEcho = 70e-3; <span class="comment">% used on the 2D example</span>
+TE_SpinEcho = 70e-3;        <span class="comment">% used on the 2D example</span>
 
 PlotIntermediate = 0 ;
 </pre><h2>initializing relaxation times field dependence<a name="2"></a></h2><p>Longitudinal and transverse relaxation rates using the models presented in: - Rooney et al MRM 2007; - Pohmann et al MRM 2016;</p><pre class="codeinput"><span class="comment">% R1 as a function of magnetic field according to</span>
-<span class="comment">% Rooney et al MRM 2007</span>
-<span class="comment">% and using a model suggested by Bottemley et al Med Phys 1984</span>
+<span class="comment">% Rooney et al, MRM, 2007</span>
+<span class="comment">% and using a model suggested by Bottemley et al, Med Phys, 1984</span>
 T1_WM = 0.00071 * (gamma*B0).^0.382;
 T1_GM = 0.00116 * (gamma*B0).^0.376;
 T1_BL = 0.00335 * (gamma*B0).^0.340;
 T1_CSF =1/0.231 * ones(size(B0));
 
-<span class="comment">% using Pohmann et al MRM 2016</span>
+<span class="comment">% using Pohmann et al, MRM, 2016</span>
 T2s_GM = 0.090 * exp(-0.142 *B0);
 T2s_WM = 0.064 * exp(-0.132 *B0);
 T2s_CSF = 0.1*ones(size(B0)); <span class="comment">% made up.. but not too relevant</span>
@@ -165,22 +163,19 @@ Ernstangle_d = @(TRep,T1) acosd( exp(-TRep./T1) );
 <span class="comment">% GRESignal calculation</span>
 GRESignal = @(FlipAngle,TRep,TE,T1,T2) sind(FlipAngle).*exp(-TE/T2).*(1-exp(-TRep./T1))./(1-(exp(-TRep./T1)).*cosd(FlipAngle));
 </pre><h2>T1-w imaging<a name="5"></a></h2><p>Sequence optimized (flip angle and TR, while TE= T2s_WM * TEfractionOfT2) at each B0 to yield maximum contrast between grey and white matter</p><pre class="codeinput"><span class="keyword">if</span> strcmp(PDT1approach,<span class="string">'minTR'</span>)
-    <span class="comment">%At Fixed TR</span>
+    <span class="comment">% At Fixed TR</span>
     TR = minTR * ones(size(B0));
     TE = TR / 2;
 <span class="keyword">elseif</span> strcmp(PDT1approach,<span class="string">'ShortEnoughTE'</span>)
-    <span class="comment">%Using a TE =T2s/8</span>
+    <span class="comment">% Using a "short" TE in respect to T2 of WM</span>
     TE = T2s_WM * TEfractionOfT2;
     TR = 2 * TE;
 <span class="keyword">else</span>
     error(<span class="string">'Unknow PD and T1 approach, it has to be either ''ShortEnoughTE'' or ''minTR'' '</span>)
 <span class="keyword">end</span>;
 
-
-
-<span class="comment">%calculation of signal</span>
+<span class="comment">% calculation of signal</span>
 BW = 1 ./ (2 * TE - DeadTime);
-
 
 OptimumTheta=zeros([1,length(B0)]);
 <span class="keyword">for</span> k=1:length(B0)
@@ -189,7 +184,6 @@ OptimumTheta=zeros([1,length(B0)]);
 GREs_GM = GRESignal(OptimumTheta,TR,TE,T1_GM,T2s_GM);
 GREs_WM = GRESignal(OptimumTheta,TR,TE,T1_WM,T2s_WM);
 GREs_CSF = GRESignal(OptimumTheta,TR,TE,T1_CSF,T2s_CSF);
-
 
 figure(<span class="string">'name'</span>,<span class="string">'T1w imaging '</span>,<span class="string">'numbertitle'</span>,<span class="string">'off'</span>)
 set(gcf,<span class="string">'Position'</span>,[ 936   165   917   369],<span class="string">'Color'</span>,[1 1 1])
@@ -224,7 +218,8 @@ y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM );
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM -GREs_GM);
 
 
-<span class="comment">% fitting the model using a log transform re-weighted</span>
+<span class="comment">% fitting the model using a log transform re-weighted by the amplitude for</span>
+<span class="comment">% a more balanced weigthting</span>
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),<span class="string">'-.'</span>,<span class="string">'Color'</span>,[1 1 1]*0.6,<span class="string">'Linewidth'</span>,2)
@@ -298,7 +293,7 @@ xlabel([<span class="string">'B_0 (T)'</span>])
 axis <span class="string">tight</span>
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*GREs_WM;
 
-<span class="comment">% fitting the model using a log transform re-weighted</span>
+<span class="comment">% fitting the model</span>
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),<span class="string">'-.'</span>,<span class="string">'Color'</span>,[1 1 1]*0.6,<span class="string">'Linewidth'</span>,2)
@@ -308,7 +303,7 @@ text(min(B0)+(max(B0)-min(B0))*0.05 ,max(y)*0.8,[<span class="string">'Power Law
 legend(<span class="string">'GM '</span>,<span class="string">'WM '</span>,<span class="string">'CSF '</span>,<span class="string">'GM fit'</span>,<span class="string">'Location'</span>,<span class="string">'East'</span>)
 fontScale(1.1)
 <span class="comment">% savefig('PDCNR_VariableTR')</span>
-</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_05.png" alt=""> <h2>T2*-w imaging contrast<a name="7"></a></h2><p>sequence optimized to have the TE that gives the optimum GM WM contrast at given field Remainging parameters were optimizer for SNR</p><pre class="codeinput"><span class="keyword">for</span> k=1:length(B0)
+</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_05.png" alt=""> <h2>T2*-w imaging contrast<a name="7"></a></h2><p>Sequence optimized to have the TE that gives the optimum GM WM contrast at given field Remainging parameters were optimizer for SNR</p><pre class="codeinput"><span class="keyword">for</span> k=1:length(B0)
     [TE(k)]=simContrastvTE([T2s_WM(k) T2s_GM(k)]*1000,0)/1000;
 <span class="keyword">end</span>;
 TR = 2 * TE;
@@ -349,7 +344,7 @@ y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM );
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM -GREs_WM);
 x0=[0.1 1];
 
-<span class="comment">% fitting the model using a log transform re-weighted</span>
+<span class="comment">% fitting the model</span>
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),<span class="string">'-.'</span>,<span class="string">'Color'</span>,[1 1 1]*0.6,<span class="string">'Linewidth'</span>,2)
@@ -360,7 +355,7 @@ text(min(B0)+(max(B0)-min(B0))*0.05 ,max(y1)*0.8,[<span class="string">'Power La
 fontScale(1.1)
 
 <span class="comment">% savefig('T2swCNR_VariableTR ')</span>
-</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_06.png" alt=""> <h2>2D GRE signal considering various numbers of interleaved slices<a name="9"></a></h2><p>T1 and T2*-w were obtained using the same consideration as in the previous sections; T2w in diffusion like experiments was also simulated:       TE assumed to be constant across fields</p><pre class="codeinput">Nslices =1:64;
+</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_06.png" alt=""> <h2>2D GRE signal considering the number of interleaved slices per TR<a name="9"></a></h2><p>T1 and T2*-w were obtained using the same consideration as in the previous sections; T2w in diffusion like experiments was also simulated:       TE assumed to be constant across fields</p><pre class="codeinput">Nslices =1:64;
 <span class="keyword">if</span> PlotIntermediate
 
     fnumbT2 = figure(<span class="string">'name'</span>,<span class="string">'2D T2* Ernst Angle '</span>,<span class="string">'numbertitle'</span>,<span class="string">'off'</span>,<span class="string">'Color'</span>,[1 1 1])
@@ -385,7 +380,7 @@ fontScale(1.1)
 
     y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM );
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM -GREs_WM);
-    <span class="comment">% fitting the model using a log transform re-weighted</span>
+    <span class="comment">% fitting the model</span>
     beta = PowerLawFit(y,B0);
     <span class="comment">% plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)</span>
     powerlawT2star(Ns)=beta(2);
@@ -424,7 +419,7 @@ fontScale(1.1)
 
 
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM -GREs_GM);
-    <span class="comment">% fitting the model using a log transform re-weighted</span>
+    <span class="comment">% fitting the model</span>
     beta = PowerLawFit(y,B0);
 
     powerlawT1(Ns)=beta(2);
@@ -446,7 +441,7 @@ fontScale(1.1)
     <span class="keyword">end</span>;
 
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*abs(GREs_CSF -GREs_GM);
-    <span class="comment">% fitting the model using a log transform re-weighted</span>
+    <span class="comment">% fitting the model</span>
     beta = PowerLawFit(y,B0);
 
     powerlawT1_GMCSF(Ns)=beta(2);
@@ -458,14 +453,14 @@ fontScale(1.1)
     TE = ones(size(B0))*TE_SpinEcho;
     TR = 1.5 * TE * Ns;
 
-    <span class="comment">%calculation of signal</span>
+    <span class="comment">% calculation of signal</span>
     BW = 1 ./ (TE - DeadTime);
 
     [OptimumTheta]=ones(size(B0))*90;
     GREs_WM = GRESignal(OptimumTheta,TR,TE,T1_WM,T2s_WM);
 
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM );
-    <span class="comment">% fitting the model using a log transform re-weighted</span>
+    <span class="comment">% fitting the model</span>
     beta = PowerLawFit(y,B0);
 
     powerlawDiff(Ns)=beta(2);
@@ -529,7 +524,7 @@ fontScale(1.1)
 figure(fnumb2D)
 
 <span class="comment">% savefig('PowerLawsOfContrast');</span>
-</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_07.png" alt=""> <h2>End of simulations<a name="10"></a></h2><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+</pre><img vspace="5" hspace="5" src="SNRandCNRfieldDependenceJMRI_07.png" alt=""> <h2>End of simulations<a name="10"></a></h2><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Read Me
 % cd to the directory where the function SNRandCNRfieldDependenceJMRI.m is located
@@ -544,23 +539,20 @@ clear all
 CurrDirectory = pwd ;
 addpath(genpath(CurrDirectory)) ;
 
+gamma = 42.577e6 ;          % gyromagnetic constant in Hz
+SNR_PowerLaw = 1.5 ;        % at High Fields this has been measured at 1.68, at lower fields it is expected to tend towards 1 because noise in the sample
+B0 = [0.1:0.1:7] ;          % range of fields of simulations
 
-gamma = 42.577e6 ; % gyromagnetic constant in Hz
-SNR_PowerLaw = 1.5 ; % at high fields this has been measured at 1.68, at lower fields it is expected to tend towards 1 because noise in the sample
-% range of fields of simulations
-B0 = [0.1:0.1:7] ;
-
-% assumption of dead time within a GRE
-%(time needed to crush magentization apply slice selective )
-DeadTime = 3e-3 ;
+%(time needed to crush magnetization, apply slice selective and phase encoding gradients)
+DeadTime = 3e-3 ;           % assumption of dead time within a GRE
 
 PDT1approach = 'ShortEnoughTE' ; % options are 'ShortEnoughTE' or 'minTR'
-minTR = 7e-3 ; % minimum repetition time achievable (used in PD and T1w in case of minTR)
-TEfractionOfT2 = 1 / 8 ; % fraction of shorter T2 at which we assume that no T2* contrast exists (used for PD and T1w)
+minTR = 7e-3 ;              % minimum repetition time achievable (used in PD and T1w in case of minTR)
+TEfractionOfT2 = 1 / 8 ;    % fraction of shorter T2 at which we assume that no T2* contrast exists (used for PD and T1w)
 
-PDflip_Ernstfract = 0.25 ; % Fraction of the Ernst flip angle used for PD
+PDflip_Ernstfract = 0.25 ;  % fraction of the Ernst flip angle used for PD
 
-TE_SpinEcho = 70e-3; % used on the 2D example
+TE_SpinEcho = 70e-3;        % used on the 2D example
 
 PlotIntermediate = 0 ;
 
@@ -572,14 +564,14 @@ PlotIntermediate = 0 ;
 
 
 % R1 as a function of magnetic field according to
-% Rooney et al MRM 2007
-% and using a model suggested by Bottemley et al Med Phys 1984
+% Rooney et al, MRM, 2007
+% and using a model suggested by Bottemley et al, Med Phys, 1984
 T1_WM = 0.00071 * (gamma*B0).^0.382;
 T1_GM = 0.00116 * (gamma*B0).^0.376;
 T1_BL = 0.00335 * (gamma*B0).^0.340;
 T1_CSF =1/0.231 * ones(size(B0));
 
-% using Pohmann et al MRM 2016
+% using Pohmann et al, MRM, 2016
 T2s_GM = 0.090 * exp(-0.142 *B0);
 T2s_WM = 0.064 * exp(-0.132 *B0);
 T2s_CSF = 0.1*ones(size(B0)); % made up.. but not too relevant
@@ -659,22 +651,19 @@ GRESignal = @(FlipAngle,TRep,TE,T1,T2) sind(FlipAngle).*exp(-TE/T2).*(1-exp(-TRe
 % at each B0 to yield maximum contrast between grey and white matter
 
 if strcmp(PDT1approach,'minTR')
-    %At Fixed TR
+    % At Fixed TR
     TR = minTR * ones(size(B0));
     TE = TR / 2;
 elseif strcmp(PDT1approach,'ShortEnoughTE')
-    %Using a TE =T2s/8
+    % Using a "short" TE in respect to T2 of WM
     TE = T2s_WM * TEfractionOfT2;
     TR = 2 * TE;
 else
     error('Unknow PD and T1 approach, it has to be either ''ShortEnoughTE'' or ''minTR'' ')
 end;
 
-
-
-%calculation of signal
+% calculation of signal
 BW = 1 ./ (2 * TE - DeadTime);
-
 
 OptimumTheta=zeros([1,length(B0)]);
 for k=1:length(B0)
@@ -683,7 +672,6 @@ end;
 GREs_GM = GRESignal(OptimumTheta,TR,TE,T1_GM,T2s_GM);
 GREs_WM = GRESignal(OptimumTheta,TR,TE,T1_WM,T2s_WM);
 GREs_CSF = GRESignal(OptimumTheta,TR,TE,T1_CSF,T2s_CSF);
-
 
 figure('name','T1w imaging ','numbertitle','off')
 set(gcf,'Position',[ 936   165   917   369],'Color',[1 1 1])
@@ -718,7 +706,8 @@ y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM );
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM -GREs_GM);
 
 
-% fitting the model using a log transform re-weighted
+% fitting the model using a log transform re-weighted by the amplitude for
+% a more balanced weigthting
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)
@@ -797,7 +786,7 @@ xlabel(['B_0 (T)'])
 axis tight
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*GREs_WM;
 
-% fitting the model using a log transform re-weighted
+% fitting the model 
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)
@@ -809,7 +798,7 @@ fontScale(1.1)
 % savefig('PDCNR_VariableTR')
 
 %% T2*-w imaging contrast
-% sequence optimized to have the TE that gives the optimum GM WM contrast at given field
+% Sequence optimized to have the TE that gives the optimum GM WM contrast at given field
 % Remainging parameters were optimizer for SNR
 
 for k=1:length(B0)
@@ -853,7 +842,7 @@ y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM );
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM -GREs_WM);
 x0=[0.1 1];
 
-% fitting the model using a log transform re-weighted
+% fitting the model 
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)
@@ -868,7 +857,7 @@ fontScale(1.1)
 %%
 
 
-%% 2D GRE signal considering various numbers of interleaved slices
+%% 2D GRE signal considering the number of interleaved slices per TR
 % T1 and T2*-w were obtained using the same consideration as in the previous sections;
 % T2w in diffusion like experiments was also simulated:
 %       TE assumed to be constant across fields 
@@ -898,7 +887,7 @@ for Ns=Nslices;
     
     y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM );
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_GM -GREs_WM);
-    % fitting the model using a log transform re-weighted
+    % fitting the model 
     beta = PowerLawFit(y,B0);
     % plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)
     powerlawT2star(Ns)=beta(2);
@@ -937,7 +926,7 @@ for Ns=Nslices;
     
     
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM -GREs_GM);
-    % fitting the model using a log transform re-weighted
+    % fitting the model 
     beta = PowerLawFit(y,B0);
     
     powerlawT1(Ns)=beta(2);
@@ -959,7 +948,7 @@ for Ns=Nslices;
     end;
     
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*abs(GREs_CSF -GREs_GM);
-    % fitting the model using a log transform re-weighted
+    % fitting the model 
     beta = PowerLawFit(y,B0);
     
     powerlawT1_GMCSF(Ns)=beta(2);
@@ -971,14 +960,14 @@ for Ns=Nslices;
     TE = ones(size(B0))*TE_SpinEcho;
     TR = 1.5 * TE * Ns;
     
-    %calculation of signal
+    % calculation of signal
     BW = 1 ./ (TE - DeadTime);
     
     [OptimumTheta]=ones(size(B0))*90;
     GREs_WM = GRESignal(OptimumTheta,TR,TE,T1_WM,T2s_WM);
     
     y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM );
-    % fitting the model using a log transform re-weighted
+    % fitting the model
     beta = PowerLawFit(y,B0);
     
     powerlawDiff(Ns)=beta(2);
