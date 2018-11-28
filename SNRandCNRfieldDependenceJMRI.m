@@ -18,7 +18,7 @@ SNR_PowerLaw = 1.5 ; % at high fields this has been measured at 1.68, at lower f
 B0 = [0.1:0.1:7] ;
 
 % assumption of dead time within a GRE
-%(time needed to crush magentization apply slice selective )
+%(time needed to crush magnetization, apply slice selective and phase encoding gradients)
 DeadTime = 3e-3 ;
 
 PDT1approach = 'ShortEnoughTE' ; % options are 'ShortEnoughTE' or 'minTR'
@@ -39,14 +39,14 @@ PlotIntermediate = 0 ;
 
 
 % R1 as a function of magnetic field according to
-% Rooney et al MRM 2007
-% and using a model suggested by Bottemley et al Med Phys 1984
+% Rooney et al, MRM, 2007
+% and using a model suggested by Bottemley et al, Med Phys, 1984
 T1_WM = 0.00071 * (gamma*B0).^0.382;
 T1_GM = 0.00116 * (gamma*B0).^0.376;
 T1_BL = 0.00335 * (gamma*B0).^0.340;
 T1_CSF =1/0.231 * ones(size(B0));
 
-% using Pohmann et al MRM 2016
+% using Pohmann et al, MRM, 2016
 T2s_GM = 0.090 * exp(-0.142 *B0);
 T2s_WM = 0.064 * exp(-0.132 *B0);
 T2s_CSF = 0.1*ones(size(B0)); % made up.. but not too relevant
@@ -126,11 +126,11 @@ GRESignal = @(FlipAngle,TRep,TE,T1,T2) sind(FlipAngle).*exp(-TE/T2).*(1-exp(-TRe
 % at each B0 to yield maximum contrast between grey and white matter
 
 if strcmp(PDT1approach,'minTR')
-    %At Fixed TR
+    % At Fixed TR
     TR = minTR * ones(size(B0));
     TE = TR / 2;
 elseif strcmp(PDT1approach,'ShortEnoughTE')
-    %Using a TE =T2s/8
+    % Using a "short" TE in respect to T2 of WM
     TE = T2s_WM * TEfractionOfT2;
     TR = 2 * TE;
 else
@@ -139,7 +139,7 @@ end;
 
 
 
-%calculation of signal
+% calculation of signal
 BW = 1 ./ (2 * TE - DeadTime);
 
 
@@ -185,7 +185,8 @@ y1 = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM );
 y = SNR_B0 .* 1./sqrt(TR) .*1./sqrt(BW) .*(GREs_WM -GREs_GM);
 
 
-% fitting the model using a log transform re-weighted
+% fitting the model using a log transform re-weighted by the amplitude for
+% a more balanced weigthting
 beta = PowerLawFit(y,B0);
 
 plot(B0,beta(1)*B0.^(beta(2)),'-.','Color',[1 1 1]*0.6,'Linewidth',2)
